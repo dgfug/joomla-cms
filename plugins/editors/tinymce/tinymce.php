@@ -243,11 +243,11 @@ class PlgEditorTinymce extends CMSPlugin
 
 		if ($langMode)
 		{
-			if (file_exists(JPATH_ROOT . '/media/vendor/tinymce/langs/' . $language->getTag() . '.js'))
+			if (file_exists(JPATH_ROOT . '/media/vendor/tinymce/langs/' . $language->getTag() . (JDEBUG ? '.js' : '.min.js')))
 			{
 				$langPrefix = $language->getTag();
 			}
-			elseif (file_exists(JPATH_ROOT . '/media/vendor/tinymce/langs/' . substr($language->getTag(), 0, strpos($language->getTag(), '-')) . '.js'))
+			elseif (file_exists(JPATH_ROOT . '/media/vendor/tinymce/langs/' . substr($language->getTag(), 0, strpos($language->getTag(), '-')) . (JDEBUG ? '.js' : '.min.js')))
 			{
 				$langPrefix = substr($language->getTag(), 0, strpos($language->getTag(), '-'));
 			}
@@ -531,7 +531,7 @@ class PlgEditorTinymce extends CMSPlugin
 		if ($dragdrop && $user->authorise('core.create', 'com_media'))
 		{
 			$externalPlugins['jdragndrop'] = HTMLHelper::_('script', 'plg_editors_tinymce/plugins/dragdrop/plugin.min.js', ['relative' => true, 'version' => 'auto', 'pathOnly' => true]);
-			$uploadUrl                     = Uri::base(false) . 'index.php?option=com_media&format=json&task=api.files';
+			$uploadUrl                     = Uri::base(false) . 'index.php?option=com_media&format=json&url=1&task=api.files';
 
 			if ($this->app->isClient('site'))
 			{
@@ -580,10 +580,10 @@ class PlgEditorTinymce extends CMSPlugin
 			$scriptOptions,
 			array(
 				'deprecation_warnings' => JDEBUG ? true : false,
-				'suffix'   => '.min',
+				'suffix'   => JDEBUG ? '' : '.min',
 				'baseURL'  => Uri::root(true) . '/media/vendor/tinymce',
 				'directionality' => $text_direction,
-				'language' => $langPrefix,
+				'language' => $langPrefix . (JDEBUG ? '' : '.min'),
 				'autosave_restore_when_empty' => false,
 				'skin'     => $skin,
 				'theme'    => $theme,
@@ -685,7 +685,7 @@ class PlgEditorTinymce extends CMSPlugin
 	 * @param   string  $name      the id of the editor field
 	 * @param   string  $excluded  the buttons that should be hidden
 	 *
-	 * @return array
+	 * @return  array|void
 	 */
 	private function tinyButtons($name, $excluded)
 	{
@@ -755,7 +755,7 @@ class PlgEditorTinymce extends CMSPlugin
 	/**
 	 * Get the global text filters to arbitrary text as per settings for current user groups
 	 *
-	 * @return  JFilterInput
+	 * @return  InputFilter
 	 *
 	 * @since   3.6
 	 */
