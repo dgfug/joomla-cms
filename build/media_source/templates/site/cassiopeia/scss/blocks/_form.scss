@@ -97,6 +97,10 @@ td .form-control {
   &[id^=id-skip-] {
     right: auto;
   }
+
+  &[id^=cbunpublish] {
+    right: auto;
+  }
 }
 
 // reveal associated tooltip on focus
@@ -106,7 +110,7 @@ td .form-control {
   display: block;
 }
 
-[id="filter[search]-desc"] {
+.filter-search-bar__description {
   bottom: 100%;
 }
 
@@ -124,11 +128,23 @@ fieldset {
 .control-group {
   margin: $cassiopeia-grid-gutter 0;
 }
-.container-popup [id="filter[search]-desc"] {
+.container-popup .filter-search-bar__description {
   top: 100%;
   bottom: auto;
 }
 
 .com-users-login__options {
   margin-top: $cassiopeia-grid-gutter*2;
+}
+
+.com-users-profile__edit,
+.com-users-registration {
+  #jform_privacyconsent_privacy,
+  #jform_profile_tos,
+  #jform_terms_terms {
+    .radio {
+      display: inline-flex;
+      gap: 1rem;
+    }
+  }
 }

@@ -57,10 +57,6 @@
   hr {
     width: 380px;
   }
-
-  label {
-    width: 440px;
-  }
 }
 
 td .form-control {
@@ -127,11 +123,11 @@ td .form-control {
   display: block;
 }
 
-[id="filter[search]-desc"] {
+.filter-search-bar__description {
   bottom: 100%;
 }
 
-.container-popup [id="filter[search]-desc"] {
+.container-popup .filter-search-bar__description {
   top: 100%;
   bottom: auto;
 }

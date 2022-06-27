@@ -18,6 +18,7 @@ use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Router\Route;
+use Joomla\CMS\Session\Session;
 use Joomla\CMS\Table\Extension;
 use Joomla\CMS\User\UserHelper;
 use Joomla\Component\Scheduler\Administrator\Scheduler\Scheduler;
@@ -36,7 +37,7 @@ use Joomla\Registry\Registry;
  * Also supports the scheduler component configuration form through auto-generation of the webcron key and injection
  * of JS of usability enhancement.
  *
- * @since __DEPLOY_VERSION__
+ * @since 4.1.0
  */
 class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 {
@@ -44,13 +45,13 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 * Length of auto-generated webcron key.
 	 *
 	 * @var integer
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	private const WEBCRON_KEY_LENGTH = 20;
 
 	/**
 	 * @var  CMSApplication
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	protected $app;
 
@@ -59,7 +60,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 *
 	 * @throws Exception
 	 */
@@ -102,7 +103,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	public function injectLazyJS(EventInterface $event): void
 	{
@@ -159,7 +160,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 *
 	 * @throws Exception
 	 */
@@ -208,7 +209,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 *
 	 * @throws Exception
 	 */
@@ -247,12 +248,17 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 *
 	 * @throws Exception
 	 */
 	public function runTestCron(Event $event)
 	{
+		if (!Session::checkToken('GET'))
+		{
+			return;
+		}
+
 		$id = (int) $this->app->input->getInt('id');
 		$allowConcurrent = $this->app->input->getBool('allowConcurrent', false);
 
@@ -305,7 +311,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return ?Task
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws RuntimeException
 	 */
 	protected function runScheduler(int $id = 0): ?Task
@@ -320,7 +326,7 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws UnexpectedValueException|RuntimeException
 	 *
 	 * @todo  Move to another plugin?
@@ -361,15 +367,14 @@ class PlgSystemSchedulerunner extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	public function generateWebcronKey(EventInterface $event): void
 	{
 		/** @var Extension $table */
 		[$context, $table] = $event->getArguments();
 
-		if ($context !== 'com_config.component'
-			|| ($table->name ?? '') !== 'COM_SCHEDULER')
+		if ($context !== 'com_config.component' || $table->name !== 'com_scheduler')
 		{
 			return;
 		}

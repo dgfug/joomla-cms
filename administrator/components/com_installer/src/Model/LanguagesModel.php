@@ -63,7 +63,7 @@ class LanguagesModel extends ListModel
 	 */
 	private function getUpdateSite()
 	{
-		$db    = $this->getDbo();
+		$db    = $this->getDatabase();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('us.location'))
 			->from($db->quoteName('#__extensions', 'e'))
@@ -207,7 +207,7 @@ class LanguagesModel extends ListModel
 	/**
 	 * Returns a record count for the updatesite.
 	 *
-	 * @param   \JDatabaseQuery|string  $query  The query.
+	 * @param   \Joomla\Database\DatabaseQuery|string  $query  The query.
 	 *
 	 * @return  integer  Number of rows for query.
 	 *

@@ -79,8 +79,8 @@ if ($this->type == 'font')
 		<?php if ($this->type == 'file' && !empty($this->source->coreFile)) : ?>
 			<div class="col-md-4 text-end">
 				<div id="toggle-buttons">
-					<?php echo $this->form->getInput('show_core'); ?>
-					<?php echo $this->form->getInput('show_diff'); ?>
+					<?php echo $this->form->renderField('show_core'); ?>
+					<?php echo $this->form->renderField('show_diff'); ?>
 				</div>
 			</div>
 		<?php endif; ?>
@@ -128,7 +128,7 @@ if ($this->type == 'font')
 					<div class="row">
 						<div class="col-md-12" id="override-pane">
 							<?php $overrideCheck = explode(DIRECTORY_SEPARATOR, $this->source->filename); ?>
-							<?php if ($overrideCheck['1'] === 'html') : ?>
+							<?php if (!empty($this->source->coreFile)) : ?>
 								<h2><?php echo Text::_('COM_TEMPLATES_FILE_OVERRIDE_PANE'); ?></h2>
 							<?php endif; ?>
 							<form action="<?php echo Route::_('index.php?option=com_templates&view=template&id=' . $input->getInt('id') . '&file=' . $this->file . '&isMedia=' . $input->get('isMedia', 0)); ?>" method="post" name="adminForm" id="adminForm">
@@ -360,19 +360,19 @@ if ($this->type == 'font')
 	</div>
 	<?php echo HTMLHelper::_('uitab.endTab'); ?>
 
-	<?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'description', Text::_('COM_TEMPLATES_TAB_DESCRIPTION')); ?>
-	<div class="row mt-3">
-		<div class="col-12">
-			<?php echo $this->loadTemplate('description'); ?>
-		</div>
-	</div>
-	<?php echo HTMLHelper::_('uitab.endTab'); ?>
-
 	<?php if ($this->pluginState) : ?>
 		<?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'files', Text::_('COM_TEMPLATES_TAB_UPDATED_FILES')); ?>
 		<?php echo $this->loadTemplate('updated_files'); ?>
 		<?php echo HTMLHelper::_('uitab.endTab'); ?>
 	<?php endif; ?>
+
+	<?php echo HTMLHelper::_('uitab.addTab', 'myTab', 'description', Text::_('COM_TEMPLATES_TAB_DESCRIPTION')); ?>
+	<div class="row mt-2">
+		<div class="col-12">
+			<?php echo $this->loadTemplate('description'); ?>
+		</div>
+	</div>
+	<?php echo HTMLHelper::_('uitab.endTab'); ?>
 
 	<?php echo HTMLHelper::_('uitab.endTabSet'); ?>
 
@@ -387,7 +387,7 @@ if ($this->type == 'font')
 		'body' => $this->loadTemplate('modal_' . $taskName . '_body')
 	);
 	?>
-	<form action="<?php echo Route::_('index.php?option=com_templates&task=template.' . $taskName . '&id=' . $input->getInt('id') . '&file=' . $this->file); ?>" method="post" name="adminForm" id="adminForm">
+	<form action="<?php echo Route::_('index.php?option=com_templates&task=template.' . $taskName . '&id=' . $input->getInt('id') . '&file=' . $this->file); ?>" method="post">
 		<?php echo LayoutHelper::render('libraries.html.bootstrap.modal.main', $copyModalData); ?>
 		<?php echo HTMLHelper::_('form.token'); ?>
 	</form>

@@ -27,23 +27,23 @@ use Joomla\CMS\Toolbar\ToolbarHelper;
 /**
  * MVC View for the Tasks list page.
  *
- * @since  __DEPLOY_VERSION__
+ * @since  4.1.0
  */
 class HtmlView extends BaseHtmlView
 {
 	/**
 	 * Array of task items.
 	 *
-	 * @var  array
-	 * @since  __DEPLOY_VERSION__
+	 * @var    array
+	 * @since  4.1.0
 	 */
 	protected $items;
 
 	/**
 	 * The pagination object.
 	 *
-	 * @var  Pagination
-	 * @since  __DEPLOY_VERSION__
+	 * @var    Pagination
+	 * @since  4.1.0
 	 * @todo   Test pagination.
 	 */
 	protected $pagination;
@@ -51,32 +51,32 @@ class HtmlView extends BaseHtmlView
 	/**
 	 * The model state.
 	 *
-	 * @var  CMSObject
-	 * @since  __DEPLOY_VERSION__
+	 * @var    CMSObject
+	 * @since  4.1.0
 	 */
 	protected $state;
 
 	/**
 	 * A Form object for search filters.
 	 *
-	 * @var  Form
-	 * @since  __DEPLOY_VERSION__
+	 * @var    Form
+	 * @since  4.1.0
 	 */
 	public $filterForm;
 
 	/**
 	 * The active search filters.
 	 *
-	 * @var  array
-	 * @since  __DEPLOY_VERSION__
+	 * @var    array
+	 * @since  4.1.0
 	 */
 	public $activeFilters;
 
 	/**
 	 * Is this view in an empty state?
 	 *
-	 * @var  boolean
-	 * @since  __DEPLOY_VERSION__
+	 * @var    boolean
+	 * @since  4.1.0
 	 */
 	private $isEmptyState = false;
 
@@ -87,7 +87,7 @@ class HtmlView extends BaseHtmlView
 	 *
 	 * @return  void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since   4.1.0
 	 * @throws  \Exception
 	 */
 	public function display($tpl = null): void
@@ -123,7 +123,7 @@ class HtmlView extends BaseHtmlView
 	 *
 	 * @return  void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 * @throws  \Exception
 	 */
 	protected function addToolbar(): void
@@ -162,8 +162,13 @@ class HtmlView extends BaseHtmlView
 			// Add the batch Enable, Disable and Trash buttons if privileged
 			if ($canDo->get('core.edit.state'))
 			{
-				$childBar->addNew('tasks.publish', 'JTOOLBAR_ENABLE')->listCheck(true)->icon('icon-publish');
-				$childBar->addNew('tasks.unpublish', 'JTOOLBAR_DISABLE')->listCheck(true)->icon('icon-unpublish');
+				$childBar->publish('tasks.publish', 'JTOOLBAR_ENABLE')->listCheck(true);
+				$childBar->unpublish('tasks.unpublish', 'JTOOLBAR_DISABLE')->listCheck(true);
+
+				if ($canDo->get('core.admin'))
+				{
+					$childBar->checkin('tasks.checkin')->listCheck(true);
+				}
 
 				$childBar->checkin('tasks.unlock', 'COM_SCHEDULER_TOOLBAR_UNLOCK')->listCheck(true)->icon('icon-unlock');
 
@@ -190,6 +195,6 @@ class HtmlView extends BaseHtmlView
 			$toolbar->preferences('com_scheduler');
 		}
 
-		$toolbar->help('JHELP_COMPONENTS_SCHEDULED_TASKS_MANAGER');
+		$toolbar->help('Scheduled_Tasks');
 	}
 }

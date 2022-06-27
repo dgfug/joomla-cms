@@ -103,9 +103,7 @@ window.Joomla = window.Joomla || {};
     };
 
     // Convert the public key information to a format usable by the browser's credentials manager
-    publicKey.challenge = Uint8Array.from(
-      window.atob(base64url2base64(publicKey.challenge)), (c) => c.charCodeAt(0),
-    );
+    publicKey.challenge = Uint8Array.from(window.atob(base64url2base64(publicKey.challenge)), (c) => c.charCodeAt(0));
 
     publicKey.user.id = Uint8Array.from(window.atob(publicKey.user.id), (c) => c.charCodeAt(0));
 
@@ -190,7 +188,7 @@ window.Joomla = window.Joomla || {};
     // Find the UI elements
     const elTR = that.parentElement.parentElement;
     const credentialId = elTR.dataset.credential_id;
-    const elTDs = elTR.querySelectorAll('td');
+    const elTDs = elTR.querySelectorAll('.webauthnManagementCell');
     const elLabelTD = elTDs[0];
     const elButtonsTD = elTDs[1];
     const elButtons = elButtonsTD.querySelectorAll('button');
@@ -300,7 +298,7 @@ window.Joomla = window.Joomla || {};
     // Find the UI elements
     const elTR = that.parentElement.parentElement;
     const credentialId = elTR.dataset.credential_id;
-    const elTDs = elTR.querySelectorAll('td');
+    const elTDs = elTR.querySelectorAll('.webauthnManagementCell');
     const elButtonsTD = elTDs[1];
     const elButtons = elButtonsTD.querySelectorAll('button');
     const elEdit = elButtons[0];

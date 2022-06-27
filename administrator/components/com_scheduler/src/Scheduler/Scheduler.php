@@ -33,22 +33,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * It is planned that this class is extended with C[R]UD methods for
  * scheduled tasks.
  *
- * @since __DEPLOY_VERSION__
+ * @since 4.1.0
  * @todo  A global instance?
  */
 class Scheduler
 {
 	private const LOG_TEXT = [
-		Status::OK         => 'COM_SCHEDULER_SCHEDULER_TASK_COMPLETE',
-		Status::NO_LOCK    => 'COM_SCHEDULER_SCHEDULER_TASK_LOCKED',
-		Status::NO_RUN     => 'COM_SCHEDULER_SCHEDULER_TASK_UNLOCKED',
-		Status::NO_ROUTINE => 'COM_SCHEDULER_SCHEDULER_TASK_ROUTINE_NA',
+		Status::OK          => 'COM_SCHEDULER_SCHEDULER_TASK_COMPLETE',
+		Status::WILL_RESUME => 'COM_SCHEDULER_SCHEDULER_TASK_WILL_RESUME',
+		Status::NO_LOCK     => 'COM_SCHEDULER_SCHEDULER_TASK_LOCKED',
+		Status::NO_RUN      => 'COM_SCHEDULER_SCHEDULER_TASK_UNLOCKED',
+		Status::NO_ROUTINE  => 'COM_SCHEDULER_SCHEDULER_TASK_ROUTINE_NA',
 	];
 
 	/**
 	 * Filters for the task queue. Can be used with fetchTaskRecords().
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @todo  remove?
 	 */
 	public const TASK_QUEUE_FILTERS = [
@@ -59,7 +60,7 @@ class Scheduler
 	/**
 	 * List config for the task queue. Can be used with fetchTaskRecords().
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @todo  remove?
 	 */
 	public const TASK_QUEUE_LIST_CONFIG = [
@@ -78,7 +79,7 @@ class Scheduler
 	 *
 	 * @return ?Task  The task executed or null if not exists
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \RuntimeException
 	 */
 	public function runTask(array $options): ?Task
@@ -111,9 +112,9 @@ class Scheduler
 		// ? Sure about inferring scheduling bypass?
 		$task = $this->getTask(
 			[
-				'id'                  => $options['id'],
+				'id'                  => (int) $options['id'],
 				'allowDisabled'       => $options['allowDisabled'],
-				'bypassScheduling'    => $options['id'] === 0,
+				'bypassScheduling'    => (int) $options['id'] !== 0,
 				'allowConcurrent'     => $options['allowConcurrent'],
 				'includeCliExclusive' => ($app->isClient('cli')),
 			]
@@ -158,7 +159,7 @@ class Scheduler
 
 		if (\array_key_exists($exitCode, self::LOG_TEXT))
 		{
-			$level = $exitCode === Status::OK ? 'info' : 'warning';
+			$level = in_array($exitCode, [Status::OK, Status::WILL_RESUME]) ? 'info' : 'warning';
 			$task->log(Text::sprintf(self::LOG_TEXT[$exitCode], $taskId, $duration, $netDuration), $level);
 
 			return $task;
@@ -179,7 +180,7 @@ class Scheduler
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws AccessException
 	 */
 	protected function configureTaskRunnerOptions(OptionsResolver $resolver): void
@@ -191,7 +192,7 @@ class Scheduler
 				'allowConcurrent' => false,
 			]
 		)
-			->setAllowedTypes('id', 'int')
+			->setAllowedTypes('id', 'numeric')
 			->setAllowedTypes('allowDisabled', 'bool')
 			->setAllowedTypes('allowConcurrent', 'bool');
 	}
@@ -204,7 +205,7 @@ class Scheduler
 	 *
 	 * @return  Task $task The task to execute
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \RuntimeException
 	 */
 	public function getTask(array $options = []): ?Task
@@ -245,7 +246,7 @@ class Scheduler
 
 		if (!isset($model))
 		{
-			throw new \RuntimeException('JLIB_APPLICATION_ERROR_MODEL_CREATE');
+			throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
 		}
 
 		$task = $model->getTask($options);
@@ -267,7 +268,7 @@ class Scheduler
 	 *
 	 * @return ?object  A matching task record, if it exists
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \RuntimeException
 	 */
 	public function fetchTaskRecord(int $id = 0, bool $allowDisabled = false): ?object
@@ -304,7 +305,7 @@ class Scheduler
 	 *
 	 * @return array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \RunTimeException
 	 */
 	public function fetchTaskRecords(array $filters, array $listConfig): array
@@ -326,10 +327,10 @@ class Scheduler
 
 		if (!$model)
 		{
-			throw new \RuntimeException('JLIB_APPLICATION_ERROR_MODEL_CREATE');
+			throw new \RuntimeException(Text::_('JLIB_APPLICATION_ERROR_MODEL_CREATE'));
 		}
 
-		$model->setState('list.select', '*');
+		$model->setState('list.select', 'a.*');
 
 		// Default to only enabled tasks
 		if (!isset($filters['state']))

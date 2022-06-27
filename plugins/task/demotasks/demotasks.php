@@ -13,6 +13,7 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Component\Scheduler\Administrator\Event\ExecuteTaskEvent;
 use Joomla\Component\Scheduler\Administrator\Task\Status;
+use Joomla\Component\Scheduler\Administrator\Task\Task;
 use Joomla\Component\Scheduler\Administrator\Traits\TaskPluginTrait;
 use Joomla\Event\SubscriberInterface;
 
@@ -20,7 +21,7 @@ use Joomla\Event\SubscriberInterface;
  * A demo task plugin. Offers 3 task routines and demonstrates the use of {@see TaskPluginTrait},
  * {@see ExecuteTaskEvent}.
  *
- * @since __DEPLOY__VERSION__
+ * @since 4.1.0
  */
 class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 {
@@ -28,7 +29,7 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 
 	/**
 	 * @var string[]
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	private const TASKS_MAP = [
 		'demoTask_r1.sleep'                    => [
@@ -44,11 +45,16 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 			'langConstPrefix' => 'PLG_TASK_DEMO_TASKS_STRESS_MEMORY_OVERRIDE',
 			'method'          => 'stressMemoryRemoveLimit',
 		],
+		'demoTask_r4.resumable' => [
+			'langConstPrefix' => 'PLG_TASK_DEMO_TASKS_RESUMABLE',
+			'method'          => 'resumable',
+			'form'            => 'testTaskForm',
+		],
 	];
 
 	/**
 	 * @var boolean
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	protected $autoloadLanguage = true;
 
@@ -57,7 +63,7 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	public static function getSubscribedEvents(): array
 	{
@@ -69,11 +75,65 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Sample resumable task.
+	 *
+	 * Whether the task will resume is random. There's a 40% chance of finishing every time it runs.
+	 *
+	 * You can use this as a template to create long running tasks which can detect an impending
+	 * timeout condition, return Status::WILL_RESUME and resume execution next time they are called.
+	 *
+	 * @param   ExecuteTaskEvent  $event  The event we are handling
+	 *
+	 * @return  integer
+	 *
+	 * @since   4.1.0
+	 * @throws  \Exception
+	 */
+	private function resumable(ExecuteTaskEvent $event): int
+	{
+		/** @var Task $task */
+		$task    = $event->getArgument('subject');
+		$timeout = (int) $event->getArgument('params')->timeout ?? 1;
+
+		$lastStatus = $task->get('last_exit_code', Status::OK);
+
+		// This is how you detect if you are resuming a task or starting it afresh
+		if ($lastStatus === Status::WILL_RESUME)
+		{
+			$this->logTask(sprintf('Resuming task %d', $task->get('id')));
+		}
+		else
+		{
+			$this->logTask(sprintf('Starting new task %d', $task->get('id')));
+		}
+
+		// Sample task body; we are simply sleeping for some time.
+		$this->logTask(sprintf('Starting %ds timeout', $timeout));
+		sleep($timeout);
+		$this->logTask(sprintf('%ds timeout over!', $timeout));
+
+		// Should I resume the task in the next step (randomly decided)?
+		$willResume = random_int(0, 5) < 4;
+
+		// Log our intention to resume or not and return the appropriate exit code.
+		if ($willResume)
+		{
+			$this->logTask(sprintf('Task %d will resume', $task->get('id')));
+		}
+		else
+		{
+			$this->logTask(sprintf('Task %d is now complete', $task->get('id')));
+		}
+
+		return $willResume ? Status::WILL_RESUME : Status::OK;
+	}
+
+	/**
 	 * @param   ExecuteTaskEvent  $event  The `onExecuteTask` event.
 	 *
 	 * @return integer  The routine exit code.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws Exception
 	 */
 	private function sleep(ExecuteTaskEvent $event): int
@@ -94,7 +154,7 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return integer  The routine exit code.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws Exception
 	 */
 	private function stressMemory(ExecuteTaskEvent $event): int
@@ -122,7 +182,7 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return integer  The routine exit code.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws Exception
 	 */
 	private function stressMemoryRemoveLimit(ExecuteTaskEvent $event): int
@@ -144,7 +204,7 @@ class PlgTaskDemotasks extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return float
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 */
 	private function getMemoryLimit(): float
 	{

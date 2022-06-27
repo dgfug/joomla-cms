@@ -11,8 +11,9 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Document\HtmlDocument;
 use Joomla\CMS\Factory;
-use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Layout\FileLayout;
 
 extract($displayData);
 
@@ -49,26 +50,28 @@ extract($displayData);
  * @var   array        $toolbarPreset  Toolbar preset (default values)
  * @var   int          $setsAmount     Amount of sets
  * @var   array        $setsNames      List of Sets names
- * @var   JForm[]      $setsForms      Form with extra options for an each set
+ * @var   Form[]       $setsForms      Form with extra options for an each set
  * @var   string       $languageFile   TinyMCE language file to translate the buttons
- * @var   JLayoutFile  $this           Context
+ * @var   FileLayout   $this           Context
  */
 
 /** @var HtmlDocument $doc */
 $doc = Factory::getApplication()->getDocument();
 $wa  = $doc->getWebAssetManager();
 
-// Add assets
-$wa->registerAndUseStyle('tinymce.skin', 'media/vendor/tinymce/skins/ui/oxide/skin.min.css')
+$wa->registerScript('tinymce', 'media/vendor/tinymce/tinymce.min.js', [], ['defer' => true])
+	->registerScript('plg_editors_tinymce', 'plg_editors_tinymce/tinymce.min.js', [], ['defer' => true], ['core', 'tinymce'])
+	->registerAndUseStyle('tinymce.skin', 'media/vendor/tinymce/skins/ui/oxide/skin.min.css')
 	->registerAndUseStyle('plg_editors_tinymce.builder', 'plg_editors_tinymce/tinymce-builder.css', [], [], ['tinymce.skin', 'dragula'])
-	->registerAndUseScript('plg_editors_tinymce.builder', 'plg_editors_tinymce/tinymce-builder.js', [], ['type' => 'module'], ['core', 'dragula'])
+	->registerScript('plg_editors_tinymce.builder', 'plg_editors_tinymce/tinymce-builder.js', [], ['type' => 'module'], ['dragula', 'plg_editors_tinymce'])
+	->useScript('plg_editors_tinymce.builder')
 	->useStyle('webcomponent.joomla-tab')
 	->useScript('webcomponent.joomla-tab');
 
 // Add TinyMCE language file to translate the buttons
 if ($languageFile)
 {
-	$wa->registerAndUseScript('tinymce.language', $languageFile, [], ['defer' => true]);
+	$wa->registerAndUseScript('tinymce.language', $languageFile, [], ['defer' => true], []);
 }
 
 // Add the builder options
@@ -103,11 +106,11 @@ $doc->addScriptOptions('plg_editors_tinymce_builder',
 			<joomla-tab-element class="tab-pane" id="set-<?php echo $num; ?>" <?php echo $isActive; ?> name="<?php echo $title; ?>">
 				<?php // Render tab content for each set ?>
 					<?php
-						$presetButtonClases = array(
+						$presetButtonClasses = [
 							'simple'   => 'btn-success',
 							'medium'   => 'btn-info',
 							'advanced' => 'btn-warning',
-						);
+						];
 						// Check whether the values exists, and if empty then use from preset
 						if (empty($value['toolbars'][$num]['menu'])
 							&& empty($value['toolbars'][$num]['toolbar1'])
@@ -139,7 +142,7 @@ $doc->addScriptOptions('plg_editors_tinymce_builder',
 						<div class="btn-group btn-group-sm">
 
 						<?php foreach(array_keys($toolbarPreset) as $presetName) :
-							$btnClass = empty($presetButtonClases[$presetName]) ? 'btn-primary' : $presetButtonClases[$presetName];
+							$btnClass = empty($presetButtonClasses[$presetName]) ? 'btn-primary' : $presetButtonClasses[$presetName];
 							?>
 							<button type="button" class="btn <?php echo $btnClass; ?> button-action"
 								data-action="setPreset" data-preset="<?php echo $presetName; ?>" data-set="<?php echo $num; ?>">

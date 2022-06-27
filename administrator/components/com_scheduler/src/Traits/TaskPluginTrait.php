@@ -21,7 +21,6 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Component\Scheduler\Administrator\Event\ExecuteTaskEvent;
 use Joomla\Component\Scheduler\Administrator\Task\Status;
 use Joomla\Event\EventInterface;
-use Joomla\Event\SubscriberInterface;
 use Joomla\Utilities\ArrayHelper;
 
 /**
@@ -33,7 +32,7 @@ use Joomla\Utilities\ArrayHelper;
  * to include this trait, and define methods corresponding to each routine along with the `TASKS_MAP` class constant to
  * declare supported routines and related properties.
  *
- * @since  __DEPLOY_VERSION__
+ * @since  4.1.0
  */
 trait TaskPluginTrait
 {
@@ -41,7 +40,7 @@ trait TaskPluginTrait
 	 * A snapshot of the routine state.
 	 *
 	 * @var array
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	protected $snapshot = [];
 
@@ -52,7 +51,7 @@ trait TaskPluginTrait
 	 *
 	 * @return void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	protected function startRoutine(ExecuteTaskEvent $event): void
 	{
@@ -76,7 +75,7 @@ trait TaskPluginTrait
 	 *
 	 * @return void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 * @throws \Exception
 	 */
 	protected function endRoutine(ExecuteTaskEvent $event, int $exitCode): void
@@ -103,7 +102,7 @@ trait TaskPluginTrait
 	 *
 	 * @return boolean  True if the form was successfully enhanced or the context was not relevant.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 * @throws \Exception
 	 */
 	public function enhanceTaskItemForm($context, $data = null): bool
@@ -146,7 +145,7 @@ trait TaskPluginTrait
 		}
 
 		// We expect the form XML in "{PLUGIN_PATH}/forms/{FORM_NAME}.xml"
-		$path                = \dirname((new \ReflectionClass(static::class))->getFileName());
+		$path                = JPATH_PLUGINS . '/' . $this->_type . '/' . $this->_name;
 		$enhancementFormFile = $path . '/forms/' . $enhancementFormName . '.xml';
 
 		try
@@ -175,7 +174,7 @@ trait TaskPluginTrait
 	 *
 	 * @return void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	public function advertiseRoutines(EventInterface $event): void
 	{
@@ -202,7 +201,7 @@ trait TaskPluginTrait
 	 *
 	 * @return  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 * @throws  \Exception
 	 */
 	protected function getRoutineId(Form $form, $data): string
@@ -211,12 +210,12 @@ trait TaskPluginTrait
 		 * Depending on when the form is loaded, the ID may either be in $data or the data already bound to the form.
 		 * $data can also either be an object or an array.
 		 */
-		$routineId = $data->taskOption->type ?? $data->type ?? $data['type'] ?? $form->getValue('type') ?? $data['taskOption']->type ?? '';
+		$routineId = $data->taskOption->id ?? $data->type ?? $data['type'] ?? $form->getValue('type') ?? $data['taskOption']->id ?? '';
 
 		// If we're unable to find a routineId, it might be in the form input.
 		if (empty($routineId))
 		{
-			$app       = $this->app ?? Factory::getApplication();
+			$app       = $this->getApplication() ?? ($this->app ?? Factory::getApplication());
 			$form      = $app->getInput()->get('jform', []);
 			$routineId = ArrayHelper::getValue($form, 'type', '', 'STRING');
 		}
@@ -232,7 +231,7 @@ trait TaskPluginTrait
 	 *
 	 * @return void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 * @throws \Exception
 	 * @todo   : use dependency injection here (starting from the Task & Scheduler classes).
 	 */
@@ -249,7 +248,7 @@ trait TaskPluginTrait
 
 		if (!$langLoaded)
 		{
-			$app = $this->app ?? Factory::getApplication();
+			$app = $this->getApplication() ?? ($this->app ?? Factory::getApplication());
 			$app->getLanguage()->load('com_scheduler', JPATH_ADMINISTRATOR);
 			$langLoaded = true;
 		}
@@ -273,7 +272,7 @@ trait TaskPluginTrait
 	 *
 	 * @return void
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \Exception
 	 */
 	public function standardRoutineHandler(ExecuteTaskEvent $event): void
@@ -340,7 +339,7 @@ trait TaskPluginTrait
 		/**
 		 * Closure to validate a status against {@see Status}
 		 *
-		 * @since __DEPLOY_VERSION__
+		 * @since 4.1.0
 		 */
 		$validateStatus = static function (int $statusCode): bool {
 			return \in_array(

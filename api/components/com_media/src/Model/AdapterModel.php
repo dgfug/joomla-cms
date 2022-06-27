@@ -12,23 +12,23 @@ namespace Joomla\Component\Media\Api\Model;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\MVC\Model\BaseModel;
-use Joomla\Component\Media\Api\Helper\AdapterTrait;
+use Joomla\Component\Media\Administrator\Provider\ProviderManagerHelperTrait;
 
 /**
  * Media web service model supporting a single adapter item.
  *
- * @since  __DEPLOY_VERSION__
+ * @since  4.1.0
  */
 class AdapterModel extends BaseModel
 {
-	use AdapterTrait;
+	use ProviderManagerHelperTrait;
 
 	/**
 	 * Method to get a single adapter.
 	 *
 	 * @return  \stdClass  The adapter.
 	 *
-	 * @since   __DEPLOY_VERSION__
+	 * @since   4.1.0
 	 */
 	public function getItem(): \stdClass
 	{

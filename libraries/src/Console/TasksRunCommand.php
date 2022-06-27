@@ -23,7 +23,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Console command to run scheduled tasks.
  *
- * @since __DEPLOY_VERSION__
+ * @since 4.1.0
  */
 class TasksRunCommand extends AbstractCommand
 {
@@ -31,13 +31,13 @@ class TasksRunCommand extends AbstractCommand
 	 * The default command name
 	 *
 	 * @var    string
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	protected static $defaultName = 'scheduler:run';
 
 	/**
 	 * @var SymfonyStyle
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	private $ioStyle;
 
@@ -47,7 +47,7 @@ class TasksRunCommand extends AbstractCommand
 	 *
 	 * @return integer The command exit code.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 4.1.0
 	 * @throws \RunTimeException
 	 * @throws InvalidArgumentException
 	 */
@@ -58,10 +58,11 @@ class TasksRunCommand extends AbstractCommand
 		 * load the namespace when it's time to do that (why?)
 		 */
 		static $outTextMap = [
-			Status::OK         => 'Task#%1$02d \'%2$s\' processed in %3$.2f seconds.',
-			Status::NO_RUN    => '<warning>Task#%1$02d \'%2$s\' failed to run. Is it already running?</warning>',
-			Status::NO_ROUTINE => '<error>Task#%1$02d \'%2$s\' is orphaned! Visit the backend to resolve.</error>',
-			'N/A'              => '<error>Task#%1$02d \'%2$s\' exited with code %4$d in %3$.2f seconds.</error>',
+			Status::OK          => 'Task#%1$02d \'%2$s\' processed in %3$.2f seconds.',
+			Status::WILL_RESUME => '<notice>Task#%1$02d \'%2$s\' ran for %3$.2f seconds, will resume next time.</notice>',
+			Status::NO_RUN      => '<warning>Task#%1$02d \'%2$s\' failed to run. Is it already running?</warning>',
+			Status::NO_ROUTINE  => '<error>Task#%1$02d \'%2$s\' is orphaned! Visit the backend to resolve.</error>',
+			'N/A'               => '<error>Task#%1$02d \'%2$s\' exited with code %4$d in %3$.2f seconds.</error>',
 		];
 
 		$this->configureIo($input, $output);
@@ -127,7 +128,7 @@ class TasksRunCommand extends AbstractCommand
 	 *
 	 * @return  void
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  4.1.0
 	 */
 	private function configureIO(InputInterface $input, OutputInterface $output)
 	{
@@ -139,7 +140,7 @@ class TasksRunCommand extends AbstractCommand
 	 *
 	 * @return  void
 	 *
-	 * @since   __DEPLOY_VERSION__
+	 * @since   4.1.0
 	 */
 	protected function configure(): void
 	{
